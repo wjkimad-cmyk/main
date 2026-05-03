@@ -10,7 +10,7 @@ git config --global user.email "본인이메일@example.com"
 
 프로젝트폴더에서
 ----
-1번만
+1회
 ----
 git init
 git clone "주소" ex)  git clone https://github.com/wjkimad-cmyk/main.git
@@ -21,7 +21,13 @@ git add 파일명 OR git add .
 git commit -m "TEST GitHub"
 
 -- 업로드할때...(이부분 햇갈릴때 : https://gemini.google.com/share/e19a9a542f93)
+----
+1회
+----
 git push --set-upstream main master -- 처음에만 서버와 로컬 강제로연결
+----
+지속
+----
 git pull origin main --rebase       -- 중간에 수정사항이생기면 로컬에 받아놓고시작
 git push origin main                -- 그리고 업로드최종
 
