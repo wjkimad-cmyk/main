@@ -11,3 +11,10 @@ git config --global user.email "본인이메일@example.com"
 프로젝트폴더에서
 git init
 git clone "주소" ex)  git clone https://github.com/wjkimad-cmyk/main.git
+git add 파일명 OR git add .    
+git commit -m "TEST GitHub"
+
+-- 업로드할때...
+git push --set-upstream main master --
+git pull origin main --rebase
+git push origin main
