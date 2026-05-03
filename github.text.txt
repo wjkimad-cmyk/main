@@ -9,8 +9,14 @@ git config --global user.name "본인이름"
 git config --global user.email "본인이메일@example.com"
 
 프로젝트폴더에서
+----
+1번만
+----
 git init
 git clone "주소" ex)  git clone https://github.com/wjkimad-cmyk/main.git
+-------
+지속
+-------
 git add 파일명 OR git add .    
 git commit -m "TEST GitHub"
 
@@ -24,3 +30,5 @@ git push origin main                -- 그리고 업로드최종
 git checkout -b wjkimbranch      -- 브랜치 생성하면서 스위칭변경
 git branch                       -- 로컬브랜치들과 *연결된상태확인
 git add .  or git add "파일명"   -- 업로드할 디렉토리 밑에서 전체파일 업로드 등록 또는 파일명으로 개별
+git push origin wjkimbranch      -- 서버에 업로드 완료 안되면 밑에꺼활용...
+push -u origin wjkimbranch
