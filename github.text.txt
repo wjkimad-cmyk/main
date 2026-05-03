@@ -14,7 +14,7 @@ git clone "주소" ex)  git clone https://github.com/wjkimad-cmyk/main.git
 git add 파일명 OR git add .    
 git commit -m "TEST GitHub"
 
--- 업로드할때...
+-- 업로드할때...(이부분 햇갈릴때 : https://gemini.google.com/share/e19a9a542f93)
 git push --set-upstream main master --
 git pull origin main --rebase
 git push origin main
