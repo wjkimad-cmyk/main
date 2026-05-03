@@ -38,3 +38,5 @@ git branch                       -- 로컬브랜치들과 *연결된상태확인
 git add .  or git add "파일명"   -- 업로드할 디렉토리 밑에서 전체파일 업로드 등록 또는 파일명으로 개별
 git push origin wjkimbranch      -- 서버에 업로드 완료 안되면 밑에꺼활용...
 push -u origin wjkimbranch
+
+git checkout master   --다시 기본 브랜치로
