@@ -15,9 +15,12 @@ git add 파일명 OR git add .
 git commit -m "TEST GitHub"
 
 -- 업로드할때...(이부분 햇갈릴때 : https://gemini.google.com/share/e19a9a542f93)
-git push --set-upstream main master --
-git pull origin main --rebase
-git push origin main
+git push --set-upstream main master -- 처음에만 서버와 로컬 강제로연결
+git pull origin main --rebase       -- 중간에 수정사항이생기면 로컬에 받아놓고시작
+git push origin main                -- 그리고 업로드최종
 
 
 ..브랜치를활용한 git 
+git checkout -b wjkimbranch      -- 브랜치 생성하면서 스위칭변경
+git branch                       -- 로컬브랜치들과 *연결된상태확인
+git add .  or git add "파일명"   -- 업로드할 디렉토리 밑에서 전체파일 업로드 등록 또는 파일명으로 개별
