@@ -18,3 +18,253 @@ git commit -m "TEST GitHub"
 git push --set-upstream main master --
 git pull origin main --rebase
 git push origin main
+
+
+--이게간단하냐?
+WITH AAA AS
+		(
+			SELECT
+				ROWNUM AS SEQ,
+				CUST_PROD,
+				TECHNOLOGY,
+				FAB,
+				QTY1,
+				QTY2,
+				QTY3,
+				QTY4,
+				QTY5,
+				QTY6,
+				QTY7,
+				GRANDTOTAL
+			FROM (
+			    SELECT
+			      DECODE(CUST_PROD, NULL, '', CUST_PROD)              CUST_PROD,
+			      DECODE(TECHNOLOGY, NULL, 'Subtotal', TECHNOLOGY)    TECHNOLOGY,
+			      DECODE(FAB, NULL, 'Subtotal', FAB)                  FAB,
+			      SUM(QTY1)                                           QTY1,
+			      SUM(QTY2)                                           QTY2,
+			      SUM(QTY3)                                           QTY3,
+			      SUM(QTY4)                                           QTY4,
+			      SUM(QTY5)                                           QTY5,
+			      SUM(QTY6)                                           QTY6,
+			      SUM(QTY7)                                           QTY7,
+			      SUM(QTY1 + QTY2 + QTY3 + QTY4 + QTY5 + QTY6 + QTY7) GRANDTOTAL
+			    FROM (
+			      SELECT
+			        /*+INDEX(HUB_LOT_EVENT_ALL HUB_LOT_EVENT_ALL_IDX3)*/
+			        C.SALES_CD AS                                                                                CUST_PROD,
+			        PROCESS_TECHNOLOGY * 1000 || 'NM'                                                            TECHNOLOGY,
+			        CASE WHEN
+			          AREA_CODE = 'KFBK'
+			          THEN 'S1'
+			        WHEN AREA_CODE = 'SFBX'
+			          THEN 'S2'
+			        WHEN AREA_CODE = 'KFBN'    /* ADD 20200324 */
+			          THEN 'S3'
+                    WHEN AREA_CODE = 'PFBF'    /* MODIRY 20260416 */
+                      THEN 'S5'
+			        END                                                                                          FAB,
+			        /*
+	                DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(SYSDATE,'YYYYMMDD'),'0',DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 0, 'YYYYMMDD'), SUM(EVENT_QTY), 0)) QTY1,
+	                DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(SYSDATE,'YYYYMMDD'),'0',DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 1, 'YYYYMMDD'), SUM(EVENT_QTY), 0)) QTY2,
+	                DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(SYSDATE,'YYYYMMDD'),'0',DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 2, 'YYYYMMDD'), SUM(EVENT_QTY), 0)) QTY3,
+	                DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(SYSDATE,'YYYYMMDD'),'0',DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 3, 'YYYYMMDD'), SUM(EVENT_QTY), 0)) QTY4,
+	                DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(SYSDATE,'YYYYMMDD'),'0',DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 4, 'YYYYMMDD'), SUM(EVENT_QTY), 0)) QTY5,
+	                DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(SYSDATE,'YYYYMMDD'),'0',DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 5, 'YYYYMMDD'), SUM(EVENT_QTY), 0)) QTY6,
+	                DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(SYSDATE,'YYYYMMDD'),'0',DECODE(SUBSTR(EVENT_OCRNCE_DTTM, 1, 8), TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 6, 'YYYYMMDD'), SUM(EVENT_QTY), 0)) QTY7
+	                */
+	                CASE WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(SYSDATE-1,'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(SYSDATE,'YYYYMMDD')||'2200' THEN 0
+	                     WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') - 1, 'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 0, 'YYYYMMDD')||'2200' THEN SUM(EVENT_QTY)
+	                     ELSE 0
+	                END QTY1,
+	                CASE WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(SYSDATE-1,'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(SYSDATE,'YYYYMMDD')||'2200' THEN 0
+	                     WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 0, 'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 1, 'YYYYMMDD')||'2200' THEN SUM(EVENT_QTY)
+	                     ELSE 0
+	                END QTY2,
+	                CASE WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(SYSDATE-1,'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(SYSDATE,'YYYYMMDD')||'2200' THEN 0
+	                     WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 1, 'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 2, 'YYYYMMDD')||'2200' THEN SUM(EVENT_QTY)
+	                     ELSE 0
+	                END QTY3,
+	                CASE WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(SYSDATE-1,'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(SYSDATE,'YYYYMMDD')||'2200' THEN 0
+	                     WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 2, 'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 3, 'YYYYMMDD')||'2200' THEN SUM(EVENT_QTY)
+	                     ELSE 0
+	                END QTY4,
+	                CASE WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(SYSDATE-1,'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(SYSDATE,'YYYYMMDD')||'2200' THEN 0
+	                     WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 3, 'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 4, 'YYYYMMDD')||'2200' THEN SUM(EVENT_QTY)
+	                     ELSE 0
+	                END QTY5,
+	                CASE WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(SYSDATE-1,'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(SYSDATE,'YYYYMMDD')||'2200' THEN 0
+	                     WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 4, 'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 5, 'YYYYMMDD')||'2200' THEN SUM(EVENT_QTY)
+	                     ELSE 0
+	                END QTY6,
+	                CASE WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(SYSDATE-1,'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(SYSDATE,'YYYYMMDD')||'2200' THEN 0
+	                     WHEN SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 5, 'YYYYMMDD')||'2200' AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 6, 'YYYYMMDD')||'2200' THEN SUM(EVENT_QTY)
+	                     ELSE 0
+	                END QTY7
+			      FROM FDRYMGR.TBN_MFI_W_LOT_EVENT A, FDRYMGR.TBN_TPO_SEC_PROD_CD C, FDRYMGR.TBN_MFI_PROCESSPLAN D,  FDRYMGR.TBN_PARTNO_LOTTYPE_MAPPING E, 
+			        (
+			          SELECT DISTINCT
+			            A.PROD_CODE AS SLIS_CODE,
+			            D.PART_NO,
+			            AR.AREA_CLASS
+			          FROM
+			            (SELECT
+			               SALES_CODE,
+			               PROD_CODE
+			             FROM FDRYMGR.IF_BS_CM_MATCH
+			             WHERE MATCH_FLD <> '         OLD      ' AND DEL_FLAG IS NULL
+			                   AND (PROD_CODE NOT LIKE 'SC%' OR PROD_CODE NOT LIKE 'SD%' OR PROD_CODE NOT LIKE 'SB%')
+			            ) A,
+			            (SELECT
+			               PROD_CODE,
+			               MED_CODE,
+			               FAM1_CODE,
+			               FAM2_CODE,
+			               FAM3_CODE,
+			               FAM4_CODE,
+			               FAM5_CODE,
+			               FAM6_CODE,
+			               FAM7_CODE,
+			               FAM8_CODE,
+			               FAM9_CODE
+			             FROM FDRYMGR.IF_BS_CM_PROD_FAMILY
+			             WHERE PROD_CODE LIKE 'S%' AND DEL_FLAG IS NULL
+			            ) B,
+			            (SELECT PROD_CD PROD_CODE
+			             FROM FDRYMGR.IF_SEC_PROD_CD
+			             WHERE PROD_CD LIKE 'S%'
+			            ) C,
+			            (SELECT
+			               TFN_CODE,
+			               FST_CODE                                                      PART_NO,
+			               DECODE(FAB_AREA, 'BDMS', 'BMOS', 'BRAD', 'BMOS', 'PFBF', 'S5', FAB_AREA) AS AREA_ID,
+			               DEL_FLAG
+			             FROM FDRYMGR.IF_BS_CM_LSI_ROUTE
+			             WHERE FAB_AREA IS NOT NULL AND (SFN_CODE LIKE 'S%' OR TFN_CODE LIKE 'S%')
+			            ) D,
+			            (SELECT
+			               PROD_CODE,
+			               AREA_ID,
+			               PROCESS
+			             FROM FDRYMGR.IF_BS_CM_AREA_PROD
+			             WHERE PROD_CODE LIKE 'S%'
+			            ) E,
+			            FDRYMGR.IF_BS_CM_AREA AR
+			          WHERE A.PROD_CODE = B.PROD_CODE AND B.PROD_CODE = C.PROD_CODE AND C.PROD_CODE = D.TFN_CODE
+			                AND D.PART_NO = E.PROD_CODE (+) AND D.AREA_ID = E.AREA_ID (+) AND D.AREA_ID = AR.AREA_ID
+			          UNION
+			          SELECT DISTINCT
+			            A.PROD_CODE AS SLIS_CODE,
+			            D.PART_NO,
+			            AR.AREA_CLASS
+			          FROM
+			            (SELECT
+			               SALES_CODE,
+			               PROD_CODE
+			             FROM FDRYMGR.IF_BS_CM_MATCH
+			             WHERE MATCH_FLD <> '         OLD      ' AND DEL_FLAG IS NULL
+			                   AND (PROD_CODE LIKE 'SC%' OR PROD_CODE LIKE 'SD%' OR PROD_CODE LIKE 'SB%')
+			            ) A,
+			            (SELECT
+			               PROD_CODE,
+			               MED_CODE,
+			               FAM1_CODE,
+			               FAM2_CODE,
+			               FAM3_CODE,
+			               FAM4_CODE,
+			               FAM5_CODE,
+			               FAM6_CODE,
+			               FAM7_CODE,
+			               FAM8_CODE,
+			               FAM9_CODE
+			             FROM FDRYMGR.IF_BS_CM_PROD_FAMILY
+			             WHERE PROD_CODE LIKE 'S%' AND DEL_FLAG IS NULL
+			            ) B,
+			            (SELECT PROD_CD PROD_CODE
+			             FROM FDRYMGR.IF_SEC_PROD_CD
+			             WHERE PROD_CD LIKE 'S%'
+			            ) C,
+			            (SELECT
+			               SFN_CODE,
+			               FST_CODE                                                   AS PART_NO,
+			               DECODE(FAB_AREA, 'BDMS', 'BMOS', 'BRAD', 'BMOS', 'PFBF', 'S5', FAB_AREA) AS AREA_ID,
+			               DEL_FLAG
+			             FROM FDRYMGR.IF_BS_CM_LSI_ROUTE
+			             WHERE FAB_AREA IS NOT NULL AND (SFN_CODE LIKE 'S%' OR TFN_CODE LIKE 'S%')
+			            ) D,
+			            (SELECT
+			               PROD_CODE,
+			               AREA_ID,
+			               PROCESS
+			             FROM FDRYMGR.IF_BS_CM_AREA_PROD
+			             WHERE PROD_CODE LIKE 'S%'
+			            ) E,
+			            FDRYMGR.IF_BS_CM_AREA AR
+			          WHERE A.PROD_CODE = B.PROD_CODE AND B.PROD_CODE = C.PROD_CODE AND C.PROD_CODE = D.SFN_CODE
+			                AND D.PART_NO = E.PROD_CODE (+) AND D.AREA_ID = E.AREA_ID (+) AND D.AREA_ID = AR.AREA_ID
+			        ) B
+			      WHERE 1 = 1
+			      		/*
+			            AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 8) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw')    , 'YYYYMMDD')
+			            AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 8) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 6, 'YYYYMMDD')
+			            */
+			            AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) >= TO_CHAR(TRUNC(SYSDATE-1, 'iw') - 1, 'YYYYMMDD')||'2200'
+	                    AND SUBSTR(EVENT_OCRNCE_DTTM, 1, 12) <= TO_CHAR(TRUNC(SYSDATE-1, 'iw') + 6, 'YYYYMMDD')||'2200'
+	                    /*
+                        AND ( (A.PROD_CODE LIKE 'SFN%'    AND A.LOT_TYPE LIKE 'P%' AND A.LOT_TYPE NOT IN ('PS') ) OR
+                              (A.PROD_CODE LIKE 'SFN08G%' AND A.LOT_TYPE = 'EC' ) OR
+                              (A.PROD_CODE LIKE 'S4L%'    AND A.LOT_TYPE LIKE 'P%' AND A.LOT_TYPE NOT IN ('PS') )
+                             )*//* MODIRY 20200324 */
+                
+                        AND ( A.PROD_CODE LIKE E.PART_NO AND A.LOT_TYPE LIKE E.LOT_TYPE  AND A.LOT_TYPE NOT IN ('PS') ) 
+                        /* MODIRY 202604?? */ /*--4월 28일 SR에는 미반영 해당 쿼리조건 체크해서 맵핑테이블추가 개발계는 가능 운영계확인필요하고
+                           위에 한줄조건에 A.PROD_CODE LIKE 'SFN08G%' AND A.LOT_TYPE = 'EC' 데이터 나오면 검증은 성공
+                        */   
+			            AND A.LOT_ACTIVITY = 'Start'
+			            AND A.LOT_STATE = 'CREATED'
+			            AND B.AREA_CLASS = 'FAB'
+                        AND (C.SALES_CD LIKE 'WR%' OR C.SALES_CD LIKE 'LP%') /* MODIRY 20260416 */
+			            AND A.PROD_CODE = B.PART_NO
+			            AND B.SLIS_CODE = C.SEC_PROD_CD
+			            AND A.PROCESS_METHOD_CODE = D.PROCESS_PLAN
+			            AND A.AREA_CODE = D.AREA_ID
+			      GROUP BY SALES_CD, PROCESS_TECHNOLOGY, AREA_CODE, EVENT_OCRNCE_DTTM /*SUBSTR(EVENT_OCRNCE_DTTM, 1, 8)*/
+			      ORDER BY TECHNOLOGY, CUST_PROD, FAB
+			    )
+			    GROUP BY ROLLUP ( CUST_PROD, FAB  ), TECHNOLOGY
+			    ORDER BY TECHNOLOGY, FAB, CUST_PROD
+			)
+		)
+		SELECT
+		  SEQ,
+		  DECODE(CUST_PROD, NULL, 'Subtotal', CUST_PROD) CUST_PROD,
+		  DECODE(CUST_PROD, NULL, '-', TECHNOLOGY)       TECHNOLOGY,
+		  DECODE(FAB, 'Subtotal', '-', FAB)              FAB,
+		  QTY1,
+		  QTY2,
+		  QTY3,
+		  QTY4,
+		  QTY5,
+		  QTY6,
+		  QTY7,
+		  GRANDTOTAL
+		FROM AAA
+		WHERE
+		  (CUST_PROD IS NULL OR (CUST_PROD IS NOT NULL AND FAB <> 'Subtotal'))
+		UNION ALL
+		SELECT
+		  99999999,
+		  'Grandtotal',
+		  '-',
+		  '-',
+		  SUM(QTY1)       QTY1,
+		  SUM(QTY2)       QTY2,
+		  SUM(QTY3)       QTY3,
+		  SUM(QTY4)       QTY4,
+		  SUM(QTY5)       QTY5,
+		  SUM(QTY6)       QTY6,
+		  SUM(QTY7)       QTY7,
+		  sum(GRANDTOTAL) GRANDTOTAL
+		FROM AAA
+		WHERE CUST_PROD IS NULL
+		ORDER BY SEQ
